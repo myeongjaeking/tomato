@@ -38,4 +38,9 @@ public class UserService {
 
         return Optional.ofNullable(userRepository.findBySub(sub));
     }
+
+    public void updateName(User user, String name){
+        Long userId = user.getId();
+        userRepository.updateUserNameById(userId, name);
+    }
 }

@@ -1,6 +1,9 @@
 package com.example.demo.controller;
 
 import com.example.demo.domain.User;
+import com.example.demo.dto.HabitDto;
+import com.example.demo.dto.UserNameDto;
+import com.example.demo.service.HabitService;
 import com.example.demo.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -9,7 +12,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -19,6 +24,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class UserController {
     private final UserService userService;
+    private final HabitService habitService;
     @Value("${spring.security.oauth2.client.registration.kakao.client-id}")
     private String kakaoClientId;
 
@@ -51,5 +57,48 @@ public class UserController {
         User user = exist_user.get();
         return ResponseEntity.ok(user);
     }
+
+    @PatchMapping("/api/user/changeName")
+    public ResponseEntity<?> changeName(Authentication authentication, @RequestBody UserNameDto userNameDto){
+        Optional<User> existUser = userService.findBySub(authentication.getName());
+        if(existUser.isPresent()){
+            User user = existUser.get();
+            userService.updateName(user, userNameDto.getName());
+            Map<String, String> response = new HashMap<>();
+            response.put("state", "success");
+            return ResponseEntity.ok(response);
+        }
+        else {
+            return ResponseEntity.badRequest().body("fail");
+        }
+    }
+
+    @PostMapping("/api/user/habits")
+    public ResponseEntity<?> settingHabit(Authentication authentication, @RequestBody HabitDto habitDto)
+    {
+        Optional<User> existUser = userService.findBySub(authentication.getName());
+        if(existUser.isPresent()) {
+            User user = existUser.get();
+            habitService.settingHabit(user, habitDto);
+            return ResponseEntity.ok("success");
+        }
+        else {
+            return ResponseEntity.badRequest().body("fail");
+        }
+    }
+
+    @GetMapping("/api/user/viewHabits")
+    public ResponseEntity<?> getHabit(Authentication authentication){
+        Optional<User> existUser = userService.findBySub(authentication.getName());
+        if(existUser.isPresent()) {
+            User user = existUser.get();
+            HabitDto habitDto = HabitDto.fromEntity(habitService.gettingHabit(user));
+            return ResponseEntity.ok(habitDto);
+        }
+        else {
+            return ResponseEntity.badRequest().body("fail");
+        }
+    }
+
 }
 
