@@ -20,7 +20,6 @@ public class ToDo {
     @JoinColumn(name = "calendar_id")
     private Calendar calendar;
     @Column
-<<<<<<< HEAD
     private boolean notificationIsTrue=true;
 
     public Long getId() {
@@ -71,9 +70,8 @@ public class ToDo {
         this.routine = routine;
     }
 
-=======
-    private boolean notificationIsTrue;
->>>>>>> origin/main
+
+
     @ManyToOne
     @JoinColumn(name = "routine_id")
     private Routine routine;
